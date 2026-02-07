@@ -11,6 +11,10 @@ public class Trade {
     private String tradeId;
 
     private Integer version;
+    
+    private String counterPartyId;
+    
+    private String bookId;
 
     private LocalDate createdDate;
 
