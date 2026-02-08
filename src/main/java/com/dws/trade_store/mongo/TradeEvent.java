@@ -17,7 +17,7 @@ public class TradeEvent {
     private LocalDate maturityDate;
     private boolean expired;
 
-    // ===== Getters & Setters =====
+    // ===== Getter & Setter =====
 
     public String getId() {
         return id;
