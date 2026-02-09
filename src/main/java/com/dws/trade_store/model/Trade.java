@@ -12,6 +12,10 @@ public class Trade {
 
     private Integer version;
 
+    // Technical version for Optimistic Locking (prevents race conditions)
+    @Version
+    private Integer internalVersion;
+
     private String counterPartyId;
 
     private String bookId;
@@ -40,7 +44,13 @@ public class Trade {
         this.version = version;
     }
 
-    // ✅ FIX STARTS HERE
+    public Integer getInternalVersion() {
+        return internalVersion;
+    }
+
+    public void setInternalVersion(Integer internalVersion) {
+        this.internalVersion = internalVersion;
+    }
 
     public String getCounterPartyId() {
         return counterPartyId;
@@ -57,8 +67,6 @@ public class Trade {
     public void setBookId(String bookId) {
         this.bookId = bookId;
     }
-
-    // ✅ FIX ENDS HERE
 
     public LocalDate getCreatedDate() {
         return createdDate;

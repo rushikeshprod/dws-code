@@ -68,6 +68,8 @@ Trades past maturity → automatically marked expired.
 Render using: https://plantuml.com/plantuml
 
 4.1 Sequence Diagram
+
+```plantuml
 @startuml
 
 actor Client
@@ -84,7 +86,7 @@ TradeRepository --> TradeService : Trade saved
 TradeService -> TradeEventRepository : save event
 TradeService -> KafkaProducer : publish trade
 
-KafkaProducer --> KafkaTopic : trade-topic
+KafkaProducer --> KafkaTopic : trade_ingestion_topic
 
 TradeService --> TradeController : Response
 
@@ -234,14 +236,14 @@ bin\windows\kafka-server-start.bat config\kraft\server.properties
 
 Create Topic
 bin\windows\kafka-topics.bat --create \
---topic trade-topic \
+--topic trade_ingestion_topic \
 --bootstrap-server localhost:9092 \
 --partitions 1 \
 --replication-factor 1
 
 Start Consumer
 bin\windows\kafka-console-consumer.bat \
---topic trade-topic \
+--topic trade_ingestion_topic \
 --from-beginning \
 --bootstrap-server localhost:9092
 
@@ -338,4 +340,38 @@ Automated lifecycle controls
 
 DevSecOps pipeline integration
 
-It reflects modern investment data platform engineering practices.
+It reflects modern investment data platform engineering practices.@startuml
+!theme plain
+skinparam ComponentStyle rectangle
+
+title DWS Trade Store - System Architecture
+
+package "External Ecosystem" {
+    actor "Portfolio Manager" as PM
+    queue "Kafka Broker" as Kafka
+}
+
+node "Spring Boot Application" {
+    component "Trade Controller" as Controller
+    component "Trade Consumer (Kafka)" as Consumer
+    component "Validation Engine" as Validation
+    component "Service Layer" as Service
+}
+
+database "H2 / PostgreSQL" as SQL #LightBlue
+database "MongoDB" as Mongo #LightGreen
+
+PM --> Controller : REST/JSON
+Kafka --> Consumer : Stream Event
+Controller --> Service
+Consumer --> Service
+Service --> Validation : Check Version & Maturity
+Validation --> Service : Result
+
+Service --> SQL : Save State (Optimistic Lock)
+Service --> Mongo : Asynchronous Audit Log
+
+note right of SQL : Golden Source\n(ACID Compliant)
+note right of Mongo : Audit Trail\n(High Throughput)
+
+@enduml
